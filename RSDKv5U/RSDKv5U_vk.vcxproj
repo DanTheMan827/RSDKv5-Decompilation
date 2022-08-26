@@ -38,7 +38,7 @@
     <ClCompile Include="..\RSDKv5\RSDK\Dev\Debug.cpp" />
     <ClCompile Include="..\RSDKv5\RSDK\Graphics\Animation.cpp" />
     <ClCompile Include="..\RSDKv5\RSDK\Graphics\Drawing.cpp" />
-    <ClCompile Include="..\RSDKv5\RSDK\Graphics\GL\GLFW\GLFWRenderDevice.cpp">
+    <ClCompile Include="..\RSDKv5\RSDK\Graphics\Vulkan\GLFW\GLFWRenderDevice.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -255,7 +255,7 @@
     <ClInclude Include="..\RSDKv5\RSDK\Dev\DevFont.hpp" />
     <ClInclude Include="..\RSDKv5\RSDK\Graphics\Animation.hpp" />
     <ClInclude Include="..\RSDKv5\RSDK\Graphics\Drawing.hpp" />
-    <ClInclude Include="..\RSDKv5\RSDK\Graphics\GL\GLFW\GLFWRenderDevice.hpp">
+    <ClInclude Include="..\RSDKv5\RSDK\Graphics\Vulkan\GLFW\GLFWRenderDevice.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -535,7 +535,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level1</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RSDK_USE_GL3;RETRO_REVISION=3;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RSDK_USE_VK;RETRO_REVISION=3;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/all/;$(SolutionDir)RSDKv5/;$(SolutionDir)dependencies/gl3/glfw/include/;$(SolutionDir)dependencies/gl3/glew/include/;$(ExecutablePath);$(DXSDK_DIR)Utilities\bin\x86;$(IncludePath);$(DXSDK_DIR)Include;$(LibraryPath);$(DXSDK_DIR)Lib\$(PlatformTargetAsMSBuildArchitecture);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -561,7 +561,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level1</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RSDK_USE_GL3;RETRO_REVISION=3;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RSDK_USE_VK;RETRO_REVISION=3;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/all/;$(SolutionDir)RSDKv5/;$(SolutionDir)dependencies/gl3/glfw/include/;$(SolutionDir)dependencies/gl3/glew/include/;$(ExecutablePath);$(DXSDK_DIR)Utilities\bin\x86;$(IncludePath);$(DXSDK_DIR)Include;$(LibraryPath);$(DXSDK_DIR)Lib\$(PlatformTargetAsMSBuildArchitecture);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -588,7 +588,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RSDK_USE_GL3;RETRO_REVISION=3;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RSDK_USE_VK;RETRO_REVISION=3;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/all/;$(SolutionDir)RSDKv5/;$(SolutionDir)dependencies/gl3/glfw/include/;$(SolutionDir)dependencies/gl3/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -617,7 +617,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RSDK_USE_GL3;RETRO_REVISION=3;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RSDK_USE_VK;RETRO_REVISION=3;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/all/;$(SolutionDir)RSDKv5/;$(SolutionDir)dependencies/gl3/glfw/include/;$(SolutionDir)dependencies/gl3/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>

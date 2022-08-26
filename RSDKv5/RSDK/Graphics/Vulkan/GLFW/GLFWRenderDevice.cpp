@@ -50,9 +50,7 @@ uint32 *RenderDevice::videoBuffer;
 bool RenderDevice::Init()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     if (!videoSettings.bordered)
@@ -99,12 +97,6 @@ bool RenderDevice::Init()
 
 bool RenderDevice::SetupRendering()
 {
-    glfwMakeContextCurrent(window);
-    GLenum err;
-    if ((err = glewInit()) != GLEW_OK) {
-        PrintLog(PRINT_NORMAL, "ERROR: failed to initialize GLEW: %s", glewGetErrorString(err));
-        return false;
-    }
 
     GetDisplays();
 
@@ -173,27 +165,14 @@ void RenderDevice::GetDisplays()
 }
 
 bool RenderDevice::InitGraphicsAPI()
-{
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_DITHER);
-    glDisable(GL_BLEND);
-    glDisable(GL_SCISSOR_TEST);
-    glDisable(GL_CULL_FACE);
+{  
+    // --clearcolor
+    // --disables/renables
 
     // setup buffers
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(RenderVertex) * (!RETRO_REV02 ? 24 : 60), NULL, GL_DYNAMIC_DRAW);
+    // --VAO then VBO
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), 0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(RenderVertex), (void *)offsetof(RenderVertex, color));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (void *)offsetof(RenderVertex, tex));
-    glEnableVertexAttribArray(2);
+    // --vertexattribptr
 
     if (videoSettings.windowed || !videoSettings.exclusiveFS) {
         if (videoSettings.windowed) {
@@ -272,28 +251,14 @@ bool RenderDevice::InitGraphicsAPI()
         textureSize.y = 512.0;
     }
 
-    glViewport(viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
+    // --viewport
 
-    glActiveTexture(GL_TEXTURE0);
-    glGenTextures(SCREEN_COUNT, screenTextures);
+    // --gentextures
 
     for (int32 i = 0; i < SCREEN_COUNT; ++i) {
-        glBindTexture(GL_TEXTURE_2D, screenTextures[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureSize.x, textureSize.y, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
-
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // --bind and teximage2d
     }
-    glGenTextures(1, &imageTexture);
-    glBindTexture(GL_TEXTURE_2D, imageTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // --create image texture
 
     videoBuffer = new uint32[RETRO_VIDEO_TEXTURE_W * RETRO_VIDEO_TEXTURE_H];
 
@@ -351,7 +316,7 @@ void RenderDevice::InitVertexBuffer()
             vertex->tex.y = 0;
     }
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(RenderVertex) * (!RETRO_REV02 ? 24 : 60), vertBuffer);
+    //glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(RenderVertex) * (!RETRO_REV02 ? 24 : 60), vertBuffer);
 }
 
 void RenderDevice::InitFPSCap()
@@ -389,8 +354,9 @@ void RenderDevice::FlipScreen()
 
         SetLinear(shaderList[videoSettings.shaderID].linear);
 
-        if (videoSettings.shaderSupport)
-            glUseProgram(shaderList[videoSettings.shaderID].programID);
+        if (videoSettings.shaderSupport) {
+            //glUseProgram(shaderList[videoSettings.shaderID].programID);
+        }
     }
 
     if (windowRefreshDelay > 0) {
@@ -400,12 +366,12 @@ void RenderDevice::FlipScreen()
         return;
     }
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
     if (videoSettings.shaderSupport) {
-        glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "textureSize"), 1, &textureSize.x);
-        glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "pixelSize"), 1, &pixelSize.x);
-        glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "viewSize"), 1, &viewSize.x);
-        glUniform1f(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "screenDim"), videoSettings.dimMax * videoSettings.dimPercent);
+        // glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "textureSize"), 1, &textureSize.x);
+        // glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "pixelSize"), 1, &pixelSize.x);
+        // glUniform2fv(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "viewSize"), 1, &viewSize.x);
+        // glUniform1f(glGetUniformLocation(shaderList[videoSettings.shaderID].programID, "screenDim"), videoSettings.dimMax * videoSettings.dimPercent);
     }
 
     int32 startVert = 0;
@@ -417,14 +383,14 @@ void RenderDevice::FlipScreen()
 #else
             startVert = 18;
 #endif
-            glBindTexture(GL_TEXTURE_2D, imageTexture);
-            glDrawArrays(GL_TRIANGLES, startVert, 6);
+            // glBindTexture(GL_TEXTURE_2D, imageTexture);
+            // glDrawArrays(GL_TRIANGLES, startVert, 6);
 
             break;
 
         case 1:
-            glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
             break;
 
         case 2:
@@ -433,61 +399,61 @@ void RenderDevice::FlipScreen()
 #else
             startVert = 6;
 #endif
-            glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
-            glDrawArrays(GL_TRIANGLES, startVert, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
+            // glDrawArrays(GL_TRIANGLES, startVert, 6);
 
 #if RETRO_REV02
             startVert = startVertex_2P[1];
 #else
             startVert = 12;
 #endif
-            glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
-            glDrawArrays(GL_TRIANGLES, startVert, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
+            // glDrawArrays(GL_TRIANGLES, startVert, 6);
             break;
 
 #if RETRO_REV02
         case 3:
-            glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
-            glDrawArrays(GL_TRIANGLES, startVertex_3P[0], 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
+            // glDrawArrays(GL_TRIANGLES, startVertex_3P[0], 6);
 
-            glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
-            glDrawArrays(GL_TRIANGLES, startVertex_3P[1], 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
+            // glDrawArrays(GL_TRIANGLES, startVertex_3P[1], 6);
 
-            glBindTexture(GL_TEXTURE_2D, screenTextures[2]);
-            glDrawArrays(GL_TRIANGLES, startVertex_3P[2], 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[2]);
+            // glDrawArrays(GL_TRIANGLES, startVertex_3P[2], 6);
             break;
 
         case 4:
-            glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
-            glDrawArrays(GL_TRIANGLES, 30, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[0]);
+            // glDrawArrays(GL_TRIANGLES, 30, 6);
 
-            glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
-            glDrawArrays(GL_TRIANGLES, 36, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[1]);
+            // glDrawArrays(GL_TRIANGLES, 36, 6);
 
-            glBindTexture(GL_TEXTURE_2D, screenTextures[2]);
-            glDrawArrays(GL_TRIANGLES, 42, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[2]);
+            // glDrawArrays(GL_TRIANGLES, 42, 6);
 
-            glBindTexture(GL_TEXTURE_2D, screenTextures[3]);
-            glDrawArrays(GL_TRIANGLES, 48, 6);
+            // glBindTexture(GL_TEXTURE_2D, screenTextures[3]);
+            // glDrawArrays(GL_TRIANGLES, 48, 6);
             break;
 #endif
     }
 
-    glFlush();
+    // glFlush();
     glfwSwapBuffers(window);
 }
 
 void RenderDevice::Release(bool32 isRefresh)
 {
-    glDeleteTextures(SCREEN_COUNT, screenTextures);
-    glDeleteTextures(1, &imageTexture);
+    // glDeleteTextures(SCREEN_COUNT, screenTextures);
+    // glDeleteTextures(1, &imageTexture);
     if (videoBuffer)
         delete[] videoBuffer;
     for (int32 i = 0; i < shaderCount; ++i) {
-        glDeleteProgram(shaderList[i].programID);
+        // glDeleteProgram(shaderList[i].programID);
     }
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    // glDeleteVertexArrays(1, &VAO);
+    // glDeleteBuffers(1, &VBO);
     shaderCount = 0;
 #if RETRO_USE_MOD_LOADER
     userShaderCount = 0;
@@ -542,26 +508,26 @@ bool RenderDevice::InitShaders()
 
         GLuint vert, frag;
         const GLchar *vchar[] = { _GLVERSION, _GLDEFINE, backupVertex };
-        vert                  = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vert, 3, vchar, NULL);
-        glCompileShader(vert);
+        // vert                  = glCreateShader(GL_VERTEX_SHADER);
+        // glShaderSource(vert, 3, vchar, NULL);
+        // glCompileShader(vert);
 
         const GLchar *fchar[] = { _GLVERSION, _GLDEFINE, backupFragment };
-        frag                  = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(frag, 3, fchar, NULL);
-        glCompileShader(frag);
+        // frag                  = glCreateShader(GL_FRAGMENT_SHADER);
+        // glShaderSource(frag, 3, fchar, NULL);
+        // glCompileShader(frag);
 
-        shader->programID = glCreateProgram();
-        glAttachShader(shader->programID, vert);
-        glAttachShader(shader->programID, frag);
-        glLinkProgram(shader->programID);
-        glDeleteShader(vert);
-        glDeleteShader(frag);
-        glBindAttribLocation(shader->programID, 0, "in_pos");
-        glBindAttribLocation(shader->programID, 1, "in_color");
-        glBindAttribLocation(shader->programID, 2, "in_UV");
+        // shader->programID = glCreateProgram();
+        // glAttachShader(shader->programID, vert);
+        // glAttachShader(shader->programID, frag);
+        // glLinkProgram(shader->programID);
+        // glDeleteShader(vert);
+        // glDeleteShader(frag);
+        // glBindAttribLocation(shader->programID, 0, "in_pos");
+        // glBindAttribLocation(shader->programID, 1, "in_color");
+        // glBindAttribLocation(shader->programID, 2, "in_UV");
 
-        glUseProgram(shader->programID);
+        // glUseProgram(shader->programID);
 
         shader->linear = videoSettings.windowed ? false : shader->linear;
     }
@@ -602,8 +568,8 @@ void RenderDevice::LoadShader(const char *fileName, bool32 linear)
         CloseFile(&info);
 
         const GLchar *glchar[] = { _GLVERSION, _GLDEFINE, (const GLchar *)fileData };
-        vert                   = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vert, 3, glchar, NULL);
+        // vert                   = glCreateShader(GL_VERTEX_SHADER);
+        // glShaderSource(vert, 3, glchar, NULL);
         glCompileShader(vert);
     }
     else
@@ -619,28 +585,28 @@ void RenderDevice::LoadShader(const char *fileName, bool32 linear)
         CloseFile(&info);
 
         const GLchar *glchar[] = { _GLVERSION, _GLDEFINE, (const GLchar *)fileData };
-        frag                   = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(frag, 3, glchar, NULL);
+        // frag                   = glCreateShader(GL_FRAGMENT_SHADER);
+        // glShaderSource(frag, 3, glchar, NULL);
         glCompileShader(frag);
     }
     else
         return;
 
-    shader->programID = glCreateProgram();
-    glAttachShader(shader->programID, vert);
-    glAttachShader(shader->programID, frag);
-    glLinkProgram(shader->programID);
-    glGetProgramiv(shader->programID, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shader->programID, 0x1000, NULL, infoLog);
-        PrintLog(PRINT_NORMAL, "OpenGL shader linking failed:\n%s", infoLog);
-        return;
-    }
-    glDeleteShader(vert);
-    glDeleteShader(frag);
-    glBindAttribLocation(shader->programID, 0, "in_pos");
-    glBindAttribLocation(shader->programID, 1, "in_color");
-    glBindAttribLocation(shader->programID, 2, "in_UV");
+    // shader->programID = glCreateProgram();
+    // glAttachShader(shader->programID, vert);
+    // glAttachShader(shader->programID, frag);
+    // glLinkProgram(shader->programID);
+    // glGetProgramiv(shader->programID, GL_LINK_STATUS, &success);
+    // if (!success) {
+    //     glGetProgramInfoLog(shader->programID, 0x1000, NULL, infoLog);
+    //     PrintLog(PRINT_NORMAL, "OpenGL shader linking failed:\n%s", infoLog);
+    //     return;
+    // }
+    // glDeleteShader(vert);
+    // glDeleteShader(frag);
+    // glBindAttribLocation(shader->programID, 0, "in_pos");
+    // glBindAttribLocation(shader->programID, 1, "in_color");
+    // glBindAttribLocation(shader->programID, 2, "in_UV");
     shaderCount++;
 };
 
@@ -694,8 +660,8 @@ void RenderDevice::GetWindowSize(int32 *width, int32 *height) { glfwGetWindowSiz
 void RenderDevice::SetupImageTexture(int32 width, int32 height, uint8 *imagePixels)
 {
     if (imagePixels) {
-        glBindTexture(GL_TEXTURE_2D, imageTexture);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, imagePixels);
+        // glBindTexture(GL_TEXTURE_2D, imageTexture);
+        // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, imagePixels);
     }
 }
 
@@ -740,8 +706,8 @@ void RenderDevice::SetupVideoTexture_YUV420(int32 width, int32 height, uint8 *yP
             yPlane += strideY;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, imageTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
+    // glBindTexture(GL_TEXTURE_2D, imageTexture);
+    // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
 }
 
 void RenderDevice::SetupVideoTexture_YUV422(int32 width, int32 height, uint8 *yPlane, uint8 *uPlane, uint8 *vPlane, int32 strideY, int32 strideU,
@@ -786,8 +752,8 @@ void RenderDevice::SetupVideoTexture_YUV422(int32 width, int32 height, uint8 *yP
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, imageTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
+    // glBindTexture(GL_TEXTURE_2D, imageTexture);
+    // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
 }
 void RenderDevice::SetupVideoTexture_YUV444(int32 width, int32 height, uint8 *yPlane, uint8 *uPlane, uint8 *vPlane, int32 strideY, int32 strideU,
                                             int32 strideV)
@@ -823,8 +789,8 @@ void RenderDevice::SetupVideoTexture_YUV444(int32 width, int32 height, uint8 *yP
             yPlane += strideY;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, imageTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
+    // glBindTexture(GL_TEXTURE_2D, imageTexture);
+    // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RETRO_VIDEO_TEXTURE_W, RETRO_VIDEO_TEXTURE_H, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, videoBuffer);
 }
 
 void RenderDevice::ProcessKeyEvent(GLFWwindow *, int32 key, int32 scancode, int32 action, int32 mods)
@@ -1080,8 +1046,8 @@ void RenderDevice::ProcessMaximizeEvent(GLFWwindow *, int32 maximized)
 void RenderDevice::SetLinear(bool32 linear)
 {
     for (int32 i = 0; i < SCREEN_COUNT; ++i) {
-        glBindTexture(GL_TEXTURE_2D, screenTextures[i]);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, linear ? GL_LINEAR : GL_NEAREST);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
+        // glBindTexture(GL_TEXTURE_2D, screenTextures[i]);
+        // glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, linear ? GL_LINEAR : GL_NEAREST);
+        // glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
     }
 }
